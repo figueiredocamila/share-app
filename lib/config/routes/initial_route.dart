@@ -8,6 +8,6 @@ class InitialRoute {
       return AppRoutes.dashboard;
     }
 
-    return AppRoutes.entrance;
+    return AppRoutes.signIn;
   }
 }
