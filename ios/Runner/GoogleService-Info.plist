@@ -3,9 +3,9 @@
 <plist version="1.0">
 <dict>
 	<key>CLIENT_ID</key>
-	<string>1014358974664-rrqb66bktqbjaqs4qtctnrfn9vupja9q.apps.googleusercontent.com</string>
+	<string>1014358974664-3kcibaaj2tbh3lbt8o2g20o4dave4l1d.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.1014358974664-rrqb66bktqbjaqs4qtctnrfn9vupja9q</string>
+	<string>com.googleusercontent.apps.1014358974664-3kcibaaj2tbh3lbt8o2g20o4dave4l1d</string>
 	<key>API_KEY</key>
 	<string>AIzaSyDXSWizeM_iFYpdJe8mXGDTvaO0c7kAGnU</string>
 	<key>GCM_SENDER_ID</key>
@@ -13,7 +13,7 @@
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.example.shareApp</string>
+	<string>com.example.share</string>
 	<key>PROJECT_ID</key>
 	<string>share-app-mobile</string>
 	<key>STORAGE_BUCKET</key>
@@ -29,7 +29,7 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:1014358974664:ios:64d351f3e5e33c1b91c5fd</string>
+	<string>1:1014358974664:ios:5b422653bf9aadbb91c5fd</string>
 	<key>DATABASE_URL</key>
 	<string>https://share-app-mobile-default-rtdb.firebaseio.com</string>
 </dict>
