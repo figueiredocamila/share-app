@@ -1,9 +1,15 @@
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 import 'package:flutter/material.dart';
 import 'package:share_app/config/routes/app_routes.dart';
 import 'package:share_app/config/routes/initial_route.dart';
 
 Future<void> main() async {
   String initialRoute = await InitialRoute().initialize();
+
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
 
   runApp(ShareApp(initialRoute: initialRoute));
 }

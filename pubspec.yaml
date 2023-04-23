@@ -37,6 +37,8 @@ dependencies:
   cupertino_icons: ^1.0.2
   email_validator: ^2.1.17
   cpf_cnpj_validator: ^2.0.0
+  firebase_auth: ^4.4.2
+  firebase_core: ^2.10.0
 
 dev_dependencies:
   build_runner: ^2.1.5
