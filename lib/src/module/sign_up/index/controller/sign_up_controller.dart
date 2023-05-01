@@ -1,22 +1,50 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class SignUpController {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  final TextEditingController cpfController = TextEditingController();
   final TextEditingController nameController = TextEditingController();
 
-  void signUp() {
-    print(emailController.text);
-    print(passwordController.text);
-    print(cpfController.text);
-    print(nameController.text);
+  String signUpFeedback = '';
+  bool isLoading = false;
+
+  void setEmailAlreadyInUse(String message) {
+    signUpFeedback = message;
+  }
+
+  void setIsLoading(status) {
+    isLoading = status;
+  }
+
+  void signUp() async {
+    setIsLoading(true);
+    try {
+      setEmailAlreadyInUse('');
+
+      UserCredential userCredential =
+          await _auth.createUserWithEmailAndPassword(
+        email: emailController.text,
+        password: passwordController.text,
+      );
+
+      await userCredential.user?.updateDisplayName(nameController.text);
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'email-already-in-use') {
+        setEmailAlreadyInUse('Este e-mail já está em uso.');
+      }
+    } catch (e) {
+      print(e);
+      setEmailAlreadyInUse('Não foi possível cadastrar este usuário');
+    }
+    setIsLoading(false);
   }
 
   void dispose() {
     emailController.dispose();
     passwordController.dispose();
-    cpfController.dispose();
     nameController.dispose();
   }
 }
