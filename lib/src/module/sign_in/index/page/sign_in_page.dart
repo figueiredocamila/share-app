@@ -93,7 +93,7 @@ class _SignInPageState extends State<SignInPage> {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () {
-                    signInController.signIn(context);
+                    signInController.signInWithEmailAndPassword(context);
                   },
                   style: ButtonStyle(
                       backgroundColor: MaterialStateProperty.all<Color>(

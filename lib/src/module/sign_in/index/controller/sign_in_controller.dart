@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:share_app/config/exceptions/auth_exceptions.dart';
 import 'package:share_app/src/module/dashboard/index/page/dashboard_page.dart';
@@ -37,6 +38,8 @@ class SignInController {
       UserCredential userCredential =
           await _auth.signInWithCredential(credential);
 
+      signIn();
+
       if (userCredential.user != null) {
         goToDashboardPage(context);
       }
@@ -52,6 +55,8 @@ class SignInController {
         password: passwordController.text,
       );
 
+      signIn();
+
       if (userCredential.user != null) {
         goToDashboardPage(context);
       }
@@ -64,20 +69,16 @@ class SignInController {
     }
   }
 
-  void signIn(BuildContext context) async {
-    User? user = _auth.currentUser;
+  void signIn() async {
+    try {
+      FirebaseMessaging messaging = FirebaseMessaging.instance;
+      var fcmToken = await messaging.getToken();
 
-    if (user != null) {
-      print(user.providerData[0].providerId);
-      if (user.providerData.length == 1 &&
-          user.providerData[0].providerId == 'google.com') {
-        signInWithGoogle(context);
-      } else if (user.providerData.length == 1 &&
-          user.providerData[0].providerId == 'password') {
-        signInWithEmailAndPassword(context);
+      if (fcmToken != null && fcmToken != '') {
+        print('Token: $fcmToken');
       }
-    } else {
-      setHelperText(authException.unableSignIn());
+    } catch (e) {
+      print(e);
     }
   }
 
