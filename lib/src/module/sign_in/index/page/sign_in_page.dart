@@ -4,6 +4,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:share_app/config/routes/app_routes.dart';
 import 'package:share_app/src/module/sign_in/index/controller/sign_in_controller.dart';
+import 'package:share_app/src/shared/widgets/button_google_login.dart';
 import 'package:share_app/src/shared/widgets/text_field_email.dart';
 import 'package:share_app/src/shared/widgets/text_field_password.dart';
 
@@ -73,7 +74,8 @@ class _SignInPageState extends State<SignInPage> {
                     style: TextStyle(fontSize: 14.0, color: Colors.black54))
               ]),
               SizedBox(height: 8),
-              TextFieldEmail(controller: signInController.emailController),
+              TextFieldEmail(
+                  controller: signInController.emailController, helperText: ''),
               SizedBox(height: 8),
               TextFieldPassword(
                   controller: signInController.passwordController),
@@ -87,16 +89,27 @@ class _SignInPageState extends State<SignInPage> {
               ]),
               SizedBox(height: 34),
               SizedBox(
+                height: 50,
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () {
-                    signInController.signIn();
+                    signInController.signIn(context);
                   },
                   style: ButtonStyle(
                       backgroundColor: MaterialStateProperty.all<Color>(
                           Colors.deepOrangeAccent)),
                   child: Text('ENTRAR'),
                 ),
+              ),
+              SizedBox(height: 24),
+              Text('OU',
+                  textAlign: TextAlign.left,
+                  style: TextStyle(fontSize: 14.0, color: Colors.black54)),
+              SizedBox(height: 24),
+              GoogleSignInButton(
+                onPressed: () {
+                  signInController.signInWithGoogle(context);
+                },
               ),
               SizedBox(height: 44),
               Row(children: [

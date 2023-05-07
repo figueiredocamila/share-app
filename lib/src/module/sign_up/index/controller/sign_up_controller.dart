@@ -20,8 +20,9 @@ class SignUpController {
   }
 
   void signUp() async {
-    setIsLoading(true);
     try {
+      setIsLoading(true);
+
       setEmailAlreadyInUse('');
 
       UserCredential userCredential =
@@ -38,8 +39,10 @@ class SignUpController {
     } catch (e) {
       print(e);
       setEmailAlreadyInUse('Não foi possível cadastrar este usuário');
+    } finally {
+      setIsLoading(false);
+      dispose();
     }
-    setIsLoading(false);
   }
 
   void dispose() {

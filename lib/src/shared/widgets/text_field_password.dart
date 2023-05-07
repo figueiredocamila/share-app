@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:validators/validators.dart';
 
 class TextFieldPassword extends StatefulWidget {
   final TextEditingController controller;
@@ -17,9 +18,18 @@ class _TextFieldPasswordState extends State<TextFieldPassword> {
 
   @override
   Widget build(BuildContext context) {
-    return TextField(
+    return TextFormField(
       controller: widget.controller,
       obscureText: _obscureText,
+      validator: (value) {
+        if (isNull(value) || value!.isEmpty) {
+          return 'Este campo é obrigatório';
+        }
+        if (value.length < 8) {
+          return 'A senha deve possuir pelo menos 8 caracteres';
+        }
+        return null;
+      },
       decoration: InputDecoration(
           labelText: 'SENHA',
           suffixIcon: IconButton(
