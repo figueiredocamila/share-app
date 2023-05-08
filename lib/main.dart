@@ -5,6 +5,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:share_app/config/routes/app_routes.dart';
 import 'package:share_app/config/routes/initial_route.dart';
+import 'package:share_app/src/shared/controller/location_controller.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -29,6 +30,9 @@ Future<void> main() async {
 
   print('User granted permission: ${settings.authorizationStatus}');
   print('Token: $fcmToken');
+
+  LocationController locationController = LocationController();
+  locationController.registerBackgroundTask();
 
   runApp(ShareApp(initialRoute: initialRoute));
 }
