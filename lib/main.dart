@@ -9,6 +9,9 @@ import 'package:share_app/src/shared/controller/location_controller.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  LocationController.registerBackgroundTask();
+
   await Firebase.initializeApp();
 
   String initialRoute = await InitialRoute().initialize();
@@ -28,11 +31,8 @@ Future<void> main() async {
     sound: true,
   );
 
-  print('User granted permission: ${settings.authorizationStatus}');
-  print('Token: $fcmToken');
-
-  LocationController locationController = LocationController();
-  locationController.registerBackgroundTask();
+  debugPrint('User granted permission: ${settings.authorizationStatus}');
+  debugPrint('Token: $fcmToken');
 
   runApp(ShareApp(initialRoute: initialRoute));
 }
@@ -50,12 +50,13 @@ class ShareApp extends StatefulWidget {
 }
 
 class _ShareAppState extends State<ShareApp> {
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      title: 'Share App',
+      theme: ThemeData(
+        primarySwatch: Colors.deepOrange,
+      ),
       navigatorKey: AppRoutes.navigatorKey,
       initialRoute: widget.initialRoute,
       routes: AppRoutes.routes,

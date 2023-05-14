@@ -37,7 +37,7 @@ class SignUpController {
         setEmailAlreadyInUse('Este e-mail já está em uso.');
       }
     } catch (e) {
-      print(e);
+      debugPrint(e.toString());
       setEmailAlreadyInUse('Não foi possível cadastrar este usuário');
     } finally {
       setIsLoading(false);

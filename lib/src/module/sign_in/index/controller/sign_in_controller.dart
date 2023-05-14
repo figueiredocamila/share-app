@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:share_app/config/exceptions/auth_exceptions.dart';
+import 'package:share_app/config/shared_preferences/shared_pref.dart';
 import 'package:share_app/src/module/dashboard/index/page/dashboard_page.dart';
 import 'package:share_app/src/module/sign_up/index/page/sign_up_page.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -10,7 +11,9 @@ class SignInController {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseMessaging messaging = FirebaseMessaging.instance;
   final AuthException authException = AuthException();
+  final SharedPref sharedPref = SharedPref();
 
   String helperText = '';
 
@@ -44,7 +47,7 @@ class SignInController {
         goToDashboardPage(context);
       }
     } catch (e) {
-      print(e);
+      debugPrint(e.toString());
     }
   }
 
@@ -71,14 +74,19 @@ class SignInController {
 
   void signIn() async {
     try {
-      FirebaseMessaging messaging = FirebaseMessaging.instance;
+      var token = await _auth.currentUser?.getIdToken();
+
+      if (token != null) {
+        sharedPref.setToken(token);
+      }
+
       var fcmToken = await messaging.getToken();
 
       if (fcmToken != null && fcmToken != '') {
-        print('Token: $fcmToken');
+        sharedPref.setFcmToken(fcmToken);
       }
     } catch (e) {
-      print(e);
+      debugPrint(e.toString());
     }
   }
 
@@ -99,19 +107,15 @@ class SignInController {
   void isLoggedIn() {
     try {
       if (_auth.currentUser != null) {
-        print('User is signed in!');
+        debugPrint('User is signed in!');
       } else {
-        print('User is signed out!');
+        debugPrint('User is signed out!');
       }
     } catch (e) {
-      print(e);
+      debugPrint(e.toString());
     } finally {
       dispose();
     }
-  }
-
-  void signOut() async {
-    await FirebaseAuth.instance.signOut();
   }
 
   void resetPassword() {

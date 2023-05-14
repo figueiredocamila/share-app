@@ -1,9 +1,9 @@
 import 'dart:async';
+import 'package:flutter/material.dart';
 import 'package:location/location.dart';
 import 'package:share_app/config/shared_preferences/shared_pref.dart';
 import 'package:share_app/src/shared/client/location/location_client.dart';
 import 'package:workmanager/workmanager.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class LocationController {
   final Location location = Location();
@@ -42,41 +42,28 @@ class LocationController {
     sendLocation(latitude, longitude);
   }
 
-  Future<int> getNextTaskId() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-
-    int lastTaskId = prefs.getInt('getCurrentlocationId') ?? 0;
-    int nextTaskId = lastTaskId + 1;
-
-    await prefs.setInt('getCurrentlocationId', nextTaskId);
-
-    return nextTaskId;
-  }
-
-  void callbackDispatcher() {
-    workmanager.executeTask((task, inputData) {
-      switch (task) {
-        case 'getCurrentlocation':
-          getCurrentLocation();
-          break;
-      }
+  static void callbackDispatcher() {
+    Workmanager().executeTask((task, inputData) async {
+      await LocationController().getCurrentLocation();
 
       return Future.value(true);
     });
   }
 
-  void registerBackgroundTask() async {
-    int getCurrentlocationId = await getNextTaskId();
-
-    workmanager.initialize(
+  static void registerBackgroundTask() async {
+    Workmanager().initialize(
       callbackDispatcher,
       isInDebugMode: false,
     );
 
-    workmanager.registerPeriodicTask(
-      getCurrentlocationId.toString(),
-      'getCurrentlocation',
-      frequency: const Duration(minutes: 2),
+    Workmanager().registerOneOffTask(
+      "1",
+      'getCurrentLocation',
+      initialDelay: const Duration(minutes: 2),
+      constraints: Constraints(
+        networkType: NetworkType.connected,
+        requiresCharging: true,
+      ),
     );
   }
 
@@ -92,7 +79,7 @@ class LocationController {
         userId,
       );
     } catch (e) {
-      print(e);
+      debugPrint(e.toString());
     }
   }
 }

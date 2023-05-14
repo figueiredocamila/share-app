@@ -4,6 +4,7 @@ class SharedPref {
   static const refreshToken = '_refreshToken';
   static const userId = '_userId';
   static const fcmToken = '_fcmToken';
+  static const token = '_token';
 
   Future<String> getFcmToken() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -45,5 +46,19 @@ class SharedPref {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
     await prefs.setString('refreshToken', refreshToken);
+  }
+
+  Future<String> getToken() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    String token = prefs.getString('token') ?? '';
+
+    return token;
+  }
+
+  Future<void> setToken(String token) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    await prefs.setString('token', token);
   }
 }
