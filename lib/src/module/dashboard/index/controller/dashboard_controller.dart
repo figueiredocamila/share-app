@@ -1,11 +1,17 @@
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:share_app/src/shared/controller/message_controller.dart';
+import 'package:flutter/material.dart';
+import 'package:share_app/config/routes/app_routes.dart';
+import 'package:share_app/src/shared/controller/auth_controller.dart';
 
 class DashboardController {
-  final MessageController receivedMessagesController = MessageController();
-  final MessageController sentMessagesController = MessageController();
+  final AuthController authController = AuthController();
+  final TextEditingController message = TextEditingController();
 
-  void signOut() async {
-    await FirebaseAuth.instance.signOut();
+  void signOut(BuildContext context) {
+    authController.signOut();
+    Navigator.pushNamed(context, AppRoutes.signIn);
+  }
+
+  void dispose() {
+    message.dispose();
   }
 }

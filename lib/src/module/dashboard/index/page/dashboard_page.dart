@@ -2,7 +2,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:share_app/src/module/dashboard/index/controller/dashboard_controller.dart';
-import 'package:share_app/src/shared/widgets/list_message.dart';
+import 'package:share_app/src/shared/controller/notification_controller.dart';
+import 'package:share_app/src/shared/widgets/list_notification.dart';
+import 'package:share_app/src/shared/widgets/text_field_message.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -13,6 +15,7 @@ class DashboardPage extends StatefulWidget {
 
 class _DashboardPageState extends State<DashboardPage> {
   DashboardController controller = DashboardController();
+  NotificationController notificationController = NotificationController();
 
   final List<Tab> tabs = [
     Tab(
@@ -28,6 +31,11 @@ class _DashboardPageState extends State<DashboardPage> {
   @override
   void initState() {
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   @override
@@ -63,7 +71,7 @@ class _DashboardPageState extends State<DashboardPage> {
                         actions: [
                           TextButton(
                             onPressed: () {
-                              controller.signOut();
+                              Navigator.of(context).pop();
                             },
                             child: Text('Cancelar',
                                 style: TextStyle(color: Colors.grey)),
@@ -72,6 +80,7 @@ class _DashboardPageState extends State<DashboardPage> {
                           OutlinedButton(
                             onPressed: () {
                               Navigator.of(context).pop();
+                              controller.signOut(context);
                             },
                             style: OutlinedButton.styleFrom(
                               side: BorderSide(color: Colors.red),
@@ -90,41 +99,46 @@ class _DashboardPageState extends State<DashboardPage> {
               ),
             ],
           ),
-          body: Padding(
-            padding: EdgeInsets.all(10.0),
-            child: TabBarView(
-              children: [
-                ListMessage(
-                    messages: controller.receivedMessagesController.getList()),
-                ListMessage(
-                    messages: controller.sentMessagesController.getList()),
-              ],
-            ),
-          ),
-          floatingActionButton: FloatingActionButton(
-            onPressed: () {
-              showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return AlertDialog(
-                    title: Text('Chat iniciado'),
-                    content: Text('O chat foi iniciado.'),
-                    actions: [
-                      TextButton(
-                        child: Text('Fechar'),
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
+          body: Stack(
+            children: [
+              Padding(
+                padding: EdgeInsets.all(10.0),
+                child: TabBarView(
+                  children: [
+                    ListMessage(
+                        notifications:
+                            notificationController.getRecievedNotification()),
+                    ListMessage(
+                        notifications:
+                            notificationController.getSentNotification()),
+                  ],
+                ),
+              ),
+              SizedBox(width: 100.0),
+              Align(
+                alignment: Alignment.bottomCenter,
+                child: Container(
+                  padding: const EdgeInsets.all(16.0),
+                  height: 100.0,
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    border: Border(
+                      top: BorderSide(
+                        color: Colors.grey,
+                        width: 0.5,
                       ),
-                    ],
-                  );
-                },
-              );
-            },
-            backgroundColor: Colors.deepOrangeAccent,
-            child: Icon(Icons.add_comment),
+                    ),
+                  ),
+                  child: TextFieldMessage(
+                    controller: controller.message,
+                    onSubmitted: (value) {
+                      notificationController.sendNotification(value);
+                    },
+                  ),
+                ),
+              ),
+            ],
           ),
-          floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
         ),
       ),
     );

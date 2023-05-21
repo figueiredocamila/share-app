@@ -28,75 +28,76 @@ class _SignUpPageState extends State<SignUpPage> {
     super.dispose();
   }
 
-  void _submit() {
+  void _submit(context) {
     if (_formKey.currentState!.validate()) {
-      signUpController.signUp();
+      signUpController.signUp(context);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-            elevation: 0.0,
-            backgroundColor: Colors.transparent,
-            leading: IconButton(
-              icon: Icon(Icons.arrow_back),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              color: Colors.deepOrangeAccent,
-            )),
-        body: SingleChildScrollView(
-            padding: EdgeInsets.all(40.0),
-            child: Column(
-              children: [
-                Form(
-                  key: _formKey,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    verticalDirection: VerticalDirection.down,
-                    children: [
-                      Row(children: [
-                        Text('DADOS PESSOAIS',
-                            textAlign: TextAlign.left,
-                            style: TextStyle(
-                                fontSize: 14.0, color: Colors.black54))
-                      ]),
-                      SizedBox(height: 8),
-                      TextFieldEmail(
-                        controller: signUpController.emailController,
-                        helperText: signUpController.signUpFeedback,
-                      ),
-                      SizedBox(height: 8),
-                      TextFieldPassword(
-                        controller: signUpController.passwordController,
-                      ),
-                      SizedBox(height: 8),
-                      TextFieldName(
-                        controller: signUpController.nameController,
-                      ),
-                      SizedBox(height: 34),
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            signUpController.isLoading ? null : _submit();
-                          },
-                          style: signUpController.isLoading
-                              ? ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.grey)
-                              : ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.deepOrangeAccent),
-                          child: signUpController.isLoading
-                              ? Text('CRIANDO CONTA')
-                              : Text('CRIAR CONTA'),
-                        ),
-                      ),
-                    ],
+      appBar: AppBar(
+          elevation: 0.0,
+          backgroundColor: Colors.transparent,
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            color: Colors.deepOrangeAccent,
+          )),
+      body: SingleChildScrollView(
+        padding: EdgeInsets.all(40.0),
+        child: Column(
+          children: [
+            Form(
+              key: _formKey,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                verticalDirection: VerticalDirection.down,
+                children: [
+                  Row(children: [
+                    Text('DADOS PESSOAIS',
+                        textAlign: TextAlign.left,
+                        style: TextStyle(fontSize: 14.0, color: Colors.black54))
+                  ]),
+                  SizedBox(height: 8),
+                  TextFieldEmail(
+                    controller: signUpController.emailController,
+                    helperText: signUpController.helperText,
                   ),
-                )
-              ],
-            )));
+                  SizedBox(height: 8),
+                  TextFieldPassword(
+                    controller: signUpController.passwordController,
+                  ),
+                  SizedBox(height: 8),
+                  TextFieldName(
+                    controller: signUpController.nameController,
+                  ),
+                  SizedBox(height: 34),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        signUpController.isLoading ? null : _submit(context);
+                      },
+                      style: signUpController.isLoading
+                          ? ElevatedButton.styleFrom(
+                              backgroundColor: Colors.grey)
+                          : ElevatedButton.styleFrom(
+                              backgroundColor: Colors.deepOrangeAccent),
+                      child: signUpController.isLoading
+                          ? Text('CRIANDO CONTA')
+                          : Text('CRIAR CONTA'),
+                    ),
+                  ),
+                ],
+              ),
+            )
+          ],
+        ),
+      ),
+    );
   }
 }

@@ -29,12 +29,14 @@ class TextFieldName extends StatelessWidget {
         return null;
       },
       decoration: const InputDecoration(
-          labelText: 'NOME COMPLETO',
-          labelStyle: TextStyle(fontSize: 12.0, color: Colors.black54),
-          enabledBorder: UnderlineInputBorder(
-              borderSide: BorderSide(
+        labelText: 'NOME COMPLETO',
+        labelStyle: TextStyle(fontSize: 12.0, color: Colors.black54),
+        enabledBorder: UnderlineInputBorder(
+          borderSide: BorderSide(
             color: Colors.deepOrangeAccent,
-          ))),
+          ),
+        ),
+      ),
     );
   }
 }

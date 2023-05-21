@@ -1,48 +1,40 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:share_app/config/routes/app_routes.dart';
+import 'package:share_app/src/shared/controller/auth_controller.dart';
 
 class SignUpController {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-
+  final AuthController authController = AuthController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController nameController = TextEditingController();
 
-  String signUpFeedback = '';
+  String helperText = '';
   bool isLoading = false;
 
-  void setEmailAlreadyInUse(String message) {
-    signUpFeedback = message;
+  void setHelperText(String message) {
+    helperText = message;
   }
 
   void setIsLoading(status) {
     isLoading = status;
   }
 
-  void signUp() async {
+  void signUp(context) {
+    setIsLoading(true);
+
     try {
-      setIsLoading(true);
-
-      setEmailAlreadyInUse('');
-
-      UserCredential userCredential =
-          await _auth.createUserWithEmailAndPassword(
-        email: emailController.text,
-        password: passwordController.text,
+      authController.signUp(
+        emailController.text,
+        passwordController.text,
+        nameController.text,
       );
 
-      await userCredential.user?.updateDisplayName(nameController.text);
-    } on FirebaseAuthException catch (e) {
-      if (e.code == 'email-already-in-use') {
-        setEmailAlreadyInUse('Este e-mail já está em uso.');
-      }
+      Navigator.pushNamed(context, AppRoutes.dashboard);
     } catch (e) {
-      debugPrint(e.toString());
-      setEmailAlreadyInUse('Não foi possível cadastrar este usuário');
-    } finally {
-      setIsLoading(false);
-      dispose();
+      setHelperText(e.toString());
     }
+
+    setIsLoading(false);
   }
 
   void dispose() {

@@ -27,7 +27,6 @@ class _TextFieldEmailState extends State<TextFieldEmail> {
   @override
   Widget build(BuildContext context) {
     return TextFormField(
-      autofocus: true,
       controller: widget.controller,
       keyboardType: TextInputType.emailAddress,
       textInputAction: TextInputAction.next,

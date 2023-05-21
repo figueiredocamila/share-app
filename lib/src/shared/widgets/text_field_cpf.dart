@@ -34,7 +34,6 @@ class _TextFieldCPFState extends State<TextFieldCPF> {
       controller: widget.controller,
       keyboardType: TextInputType.number,
       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-      autofocus: false,
       textCapitalization: TextCapitalization.none,
       enableSuggestions: false,
       decoration: InputDecoration(

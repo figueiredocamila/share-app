@@ -29,6 +29,7 @@ dependencies:
   dio: ^5.1.0
   json_annotation: ^4.8.1
   retrofit_generator: ^6.0.0+3
+  get: ^4.6.5
 
 dev_dependencies:
   json_serializable: ^6.6.2

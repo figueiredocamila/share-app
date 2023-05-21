@@ -1,9 +1,10 @@
-// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
-
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:share_app/config/routes/app_routes.dart';
-import 'package:share_app/src/module/sign_in/index/controller/sign_in_controller.dart';
+import 'package:share_app/config/shared_preferences/shared_pref.dart';
+import 'package:share_app/src/module/sign_in/index/controller/sign_in_page_controller.dart';
+import 'package:share_app/src/shared/controller/auth_controller.dart';
+import 'package:share_app/src/shared/controller/loading_controller.dart';
 import 'package:share_app/src/shared/widgets/button_google_login.dart';
 import 'package:share_app/src/shared/widgets/text_field_email.dart';
 import 'package:share_app/src/shared/widgets/text_field_password.dart';
@@ -16,8 +17,12 @@ class SignInPage extends StatefulWidget {
 }
 
 class _SignInPageState extends State<SignInPage> {
-  SignInController signInController = SignInController();
-  AppRoutes appRoutes = AppRoutes();
+  SignInPageController signInPageController = SignInPageController();
+  AuthController authController = AuthController();
+  LoadingController loadingController = LoadingController();
+  SharedPref sharedPref = SharedPref();
+
+  final _formKey = GlobalKey<FormState>();
 
   @override
   void initState() {
@@ -26,113 +31,197 @@ class _SignInPageState extends State<SignInPage> {
 
   @override
   void dispose() {
-    signInController.dispose();
+    signInPageController.dispose();
+    loadingController.dispose();
     super.dispose();
+  }
+
+  Future<void> _submit(BuildContext context) async {
+    if (_formKey.currentState!.validate()) {
+      try {
+        loadingController.startLoading();
+
+        await authController.signInWithEmailAndPassword(
+            signInPageController.emailController.text,
+            signInPageController.passwordController.text);
+
+        final erro = await sharedPref.getError();
+
+        if (erro.isNotEmpty) {
+          throw erro;
+        }
+
+        Navigator.pushNamed(context, AppRoutes.dashboard);
+      } catch (e) {
+        debugPrint('pegou erro ${e.toString()}');
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.toString()),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      } finally {
+        loadingController.stopLoading();
+      }
+    }
+  }
+
+  Future<void> _submitWithGoogle(BuildContext context) async {
+    try {
+      loadingController.startLoading();
+
+      await authController.signInWithGoogle();
+
+      final erro = await sharedPref.getError();
+
+      if (erro.isNotEmpty) {
+        throw erro;
+      }
+
+      Navigator.pushNamed(context, AppRoutes.dashboard);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.toString()),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } finally {
+      loadingController.stopLoading();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          elevation: 0.0,
-          backgroundColor: Colors.transparent,
-        ),
-        body: SingleChildScrollView(
-          padding: EdgeInsets.all(40.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.attractions_outlined,
-                    color: Colors.deepOrangeAccent,
-                    size: 60.0,
-                  ),
-                  Text.rich(TextSpan(
-                      text: 'SHARE',
-                      style: TextStyle(
-                          fontSize: 40.0,
+      appBar: AppBar(
+        elevation: 0.0,
+        backgroundColor: Colors.transparent,
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(40.0),
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: const [
+                Icon(
+                  Icons.attractions_outlined,
+                  color: Colors.deepOrangeAccent,
+                  size: 60.0,
+                ),
+                Text.rich(
+                  TextSpan(
+                    text: 'SHARE',
+                    style: TextStyle(
+                        fontSize: 40.0,
+                        color: Colors.deepOrangeAccent,
+                        fontWeight: FontWeight.bold),
+                    children: [
+                      TextSpan(
+                        text: 'app.',
+                        style: TextStyle(
+                          fontSize: 20.0,
                           color: Colors.deepOrangeAccent,
-                          fontWeight: FontWeight.bold),
-                      children: [
-                        TextSpan(
-                          text: 'app.',
-                          style: TextStyle(
-                            fontSize: 20.0,
-                            color: Colors.deepOrangeAccent,
-                          ),
-                        )
-                      ]))
+                        ),
+                      )
+                    ],
+                  ),
+                )
+              ],
+            ),
+            const SizedBox(height: 54),
+            Row(children: const [
+              Text('FAÇA LOGIN E ACESSE SUA CONTA',
+                  textAlign: TextAlign.left,
+                  style: TextStyle(fontSize: 14.0, color: Colors.black54))
+            ]),
+            Form(
+              key: _formKey,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                verticalDirection: VerticalDirection.down,
+                children: [
+                  Row(children: const [
+                    Text('DADOS PESSOAIS',
+                        textAlign: TextAlign.left,
+                        style: TextStyle(fontSize: 14.0, color: Colors.black54))
+                  ]),
+                  const SizedBox(height: 8),
+                  TextFieldEmail(
+                      controller: signInPageController.emailController,
+                      helperText: ''),
+                  const SizedBox(height: 8),
+                  TextFieldPassword(
+                    controller: signInPageController.passwordController,
+                  ),
                 ],
               ),
-              SizedBox(height: 54),
-              Row(children: [
-                Text('FAÇA LOGIN E ACESSE SUA CONTA',
-                    textAlign: TextAlign.left,
-                    style: TextStyle(fontSize: 14.0, color: Colors.black54))
-              ]),
-              SizedBox(height: 8),
-              TextFieldEmail(
-                  controller: signInController.emailController, helperText: ''),
-              SizedBox(height: 8),
-              TextFieldPassword(
-                  controller: signInController.passwordController),
-              SizedBox(height: 14),
-              Row(children: [
-                Text.rich(TextSpan(
-                    text: 'Esqueceu sua senha?',
-                    recognizer: TapGestureRecognizer()
-                      ..onTap = () => signInController.resetPassword(),
-                    style: TextStyle(fontSize: 12.0, color: Colors.black54)))
-              ]),
-              SizedBox(height: 34),
-              SizedBox(
-                height: 50,
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () {
-                    signInController.signInWithEmailAndPassword(context);
-                  },
-                  style: ButtonStyle(
-                      backgroundColor: MaterialStateProperty.all<Color>(
-                          Colors.deepOrangeAccent)),
-                  child: Text('ENTRAR'),
-                ),
-              ),
-              SizedBox(height: 24),
-              Text('OU',
-                  textAlign: TextAlign.left,
-                  style: TextStyle(fontSize: 14.0, color: Colors.black54)),
-              SizedBox(height: 24),
-              GoogleSignInButton(
+            ),
+            const SizedBox(height: 14),
+            // Row(children: [
+            //   Text.rich(TextSpan(
+            //       text: 'Esqueceu sua senha?',
+            //       recognizer: TapGestureRecognizer()
+            //         ..onTap = () => signInController.resetPassword(),
+            //       style: TextStyle(fontSize: 12.0, color: Colors.black54)))
+            // ]),
+            const SizedBox(height: 34),
+            SizedBox(
+              height: 50,
+              width: double.infinity,
+              child: ElevatedButton(
                 onPressed: () {
-                  signInController.signInWithGoogle(context);
+                  loadingController.isLoading ? null : _submit(context);
                 },
+                style: loadingController.isLoading
+                    ? ElevatedButton.styleFrom(backgroundColor: Colors.grey)
+                    : ElevatedButton.styleFrom(
+                        backgroundColor: Colors.deepOrangeAccent),
+                child: loadingController.isLoading
+                    ? const Text('ENTRANDO')
+                    : const Text('ENTRAR'),
               ),
-              SizedBox(height: 44),
-              Row(children: [
+            ),
+            const SizedBox(height: 24),
+            const Text('OU',
+                textAlign: TextAlign.left,
+                style: TextStyle(fontSize: 14.0, color: Colors.black54)),
+            const SizedBox(height: 24),
+            GoogleSignInButton(
+              onPressed: () {
+                loadingController.isLoading ? null : _submitWithGoogle(context);
+              },
+            ),
+            const SizedBox(height: 44),
+            Row(
+              children: [
                 Text.rich(
                   TextSpan(
                     text: 'PRECISA DE UMA CONTA? ',
-                    style: TextStyle(fontSize: 14.0, color: Colors.black54),
+                    style:
+                        const TextStyle(fontSize: 14.0, color: Colors.black54),
                     children: [
                       TextSpan(
                         text: 'CADASTRE-SE',
                         recognizer: TapGestureRecognizer()
-                          ..onTap =
-                              () => signInController.goToSignUpPage(context),
-                        style: TextStyle(
+                          ..onTap = () =>
+                              Navigator.pushNamed(context, AppRoutes.signUp),
+                        style: const TextStyle(
                           color: Colors.deepOrangeAccent,
                         ),
                       ),
                     ],
                   ),
                 )
-              ]),
-            ],
-          ),
-        ));
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

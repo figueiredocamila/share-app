@@ -5,9 +5,9 @@ class InitialRoute {
   final SharedPref sharedPref = SharedPref();
 
   Future<String> initialize() async {
-    dynamic token = sharedPref.getToken();
+    dynamic userId = await sharedPref.getUserId();
 
-    if (token != null) {
+    if (userId.toString().isNotEmpty) {
       return AppRoutes.dashboard;
     }
 

@@ -5,19 +5,14 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:share_app/config/routes/app_routes.dart';
 import 'package:share_app/config/routes/initial_route.dart';
+import 'package:share_app/config/shared_preferences/shared_pref.dart';
 import 'package:share_app/src/shared/controller/location_controller.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  LocationController.registerBackgroundTask();
-
   await Firebase.initializeApp();
 
-  String initialRoute = await InitialRoute().initialize();
-
-  final fcmToken = await FirebaseMessaging.instance.getToken();
-  await FirebaseMessaging.instance.setAutoInitEnabled(true);
+  final SharedPref sharedPref = SharedPref();
 
   FirebaseMessaging messaging = FirebaseMessaging.instance;
 
@@ -32,7 +27,27 @@ Future<void> main() async {
   );
 
   debugPrint('User granted permission: ${settings.authorizationStatus}');
+
+  if (settings.authorizationStatus == AuthorizationStatus.denied) {
+    await messaging.unsubscribeFromTopic('all');
+    // throw notificationException.notificationPermissionDenied();
+  }
+
+  final fcmToken = await messaging.getToken();
+
+  await messaging.subscribeToTopic('all');
+
   debugPrint('Token: $fcmToken');
+
+  if (fcmToken != null && fcmToken != '') {
+    await sharedPref.setFcmToken(fcmToken);
+  }
+
+  await messaging.setAutoInitEnabled(true);
+
+  LocationController.registerBackgroundTask();
+
+  String initialRoute = await InitialRoute().initialize();
 
   runApp(ShareApp(initialRoute: initialRoute));
 }
