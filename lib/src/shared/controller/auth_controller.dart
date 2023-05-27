@@ -70,7 +70,7 @@ class AuthController {
     sharedPref.setUserName(_auth.currentUser?.displayName ?? '');
   }
 
-  void signUp(String email, String password, String displayName) async {
+  Future<void> signUp(String email, String password, String displayName) async {
     try {
       UserCredential userCredential =
           await _auth.createUserWithEmailAndPassword(

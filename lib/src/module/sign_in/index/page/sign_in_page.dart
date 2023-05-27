@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:share_app/config/routes/app_routes.dart';
@@ -53,8 +55,6 @@ class _SignInPageState extends State<SignInPage> {
 
         Navigator.pushNamed(context, AppRoutes.dashboard);
       } catch (e) {
-        debugPrint('pegou erro ${e.toString()}');
-
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(e.toString()),

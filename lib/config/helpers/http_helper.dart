@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:share_app/config/environment/environment.dart';
 
 bool isDebug = false;
@@ -21,13 +22,14 @@ Future<Map<String, String>> getHeaderDefault() async {
 }
 
 Future getEnvironment() async {
+  debugPrint(' url $Environment.baseUrl');
   return Environment.baseUrl;
 }
 
 Future<BaseOptions> getOptions() async {
   return BaseOptions(
     baseUrl: await getEnvironment(),
-    headers: await getHeaderDefault(),
+    // headers: await getHeaderDefault(),
     receiveTimeout: const Duration(seconds: 15),
     sendTimeout: const Duration(seconds: 15),
     connectTimeout: const Duration(seconds: 15),

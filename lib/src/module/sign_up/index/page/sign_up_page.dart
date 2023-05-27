@@ -1,7 +1,11 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 
 import 'package:flutter/material.dart';
+import 'package:share_app/config/routes/app_routes.dart';
+import 'package:share_app/config/shared_preferences/shared_pref.dart';
 import 'package:share_app/src/module/sign_up/index/controller/sign_up_controller.dart';
+import 'package:share_app/src/shared/controller/auth_controller.dart';
+import 'package:share_app/src/shared/controller/loading_controller.dart';
 import 'package:share_app/src/shared/widgets/text_field_email.dart';
 import 'package:share_app/src/shared/widgets/text_field_name.dart';
 import 'package:share_app/src/shared/widgets/text_field_password.dart';
@@ -15,6 +19,10 @@ class SignUpPage extends StatefulWidget {
 
 class _SignUpPageState extends State<SignUpPage> {
   SignUpController signUpController = SignUpController();
+  LoadingController loadingController = LoadingController();
+  AuthController authController = AuthController();
+  SharedPref sharedPref = SharedPref();
+
   final _formKey = GlobalKey<FormState>();
 
   @override
@@ -28,9 +36,35 @@ class _SignUpPageState extends State<SignUpPage> {
     super.dispose();
   }
 
-  void _submit(context) {
+  Future<void> _submit(context) async {
     if (_formKey.currentState!.validate()) {
-      signUpController.signUp(context);
+      try {
+        loadingController.startLoading();
+
+        await authController.signUp(
+          signUpController.emailController.text,
+          signUpController.passwordController.text,
+          signUpController.nameController.text,
+        );
+
+        final erro = await sharedPref.getError();
+
+        if (erro.isNotEmpty) {
+          throw erro;
+        }
+
+        Navigator.pushNamed(context, AppRoutes.dashboard);
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.toString()),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      } finally {
+        loadingController.stopLoading();
+      }
     }
   }
 
@@ -80,14 +114,14 @@ class _SignUpPageState extends State<SignUpPage> {
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: () {
-                        signUpController.isLoading ? null : _submit(context);
+                        loadingController.isLoading ? null : _submit(context);
                       },
-                      style: signUpController.isLoading
+                      style: loadingController.isLoading
                           ? ElevatedButton.styleFrom(
                               backgroundColor: Colors.grey)
                           : ElevatedButton.styleFrom(
                               backgroundColor: Colors.deepOrangeAccent),
-                      child: signUpController.isLoading
+                      child: loadingController.isLoading
                           ? Text('CRIANDO CONTA')
                           : Text('CRIAR CONTA'),
                     ),

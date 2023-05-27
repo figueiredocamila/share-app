@@ -10,6 +10,7 @@ class NotificationModel {
   final double? lng;
   final String? userId;
   final String? createdAt;
+  final int? id;
 
   NotificationModel({
     required this.body,
@@ -18,11 +19,17 @@ class NotificationModel {
     this.lng,
     this.userId,
     this.createdAt,
+    this.id,
   });
 
   static NotificationModel get empty => NotificationModel(
         body: '',
         title: '',
+        lat: 0,
+        lng: 0,
+        userId: '',
+        createdAt: '',
+        id: 0,
       );
 
   factory NotificationModel.fromJson(Map<String, dynamic> json) =>

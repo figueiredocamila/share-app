@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:share_app/config/routes/app_routes.dart';
 import 'package:share_app/src/shared/controller/auth_controller.dart';
 
 class SignUpController {
@@ -17,24 +16,6 @@ class SignUpController {
 
   void setIsLoading(status) {
     isLoading = status;
-  }
-
-  void signUp(context) {
-    setIsLoading(true);
-
-    try {
-      authController.signUp(
-        emailController.text,
-        passwordController.text,
-        nameController.text,
-      );
-
-      Navigator.pushNamed(context, AppRoutes.dashboard);
-    } catch (e) {
-      setHelperText(e.toString());
-    }
-
-    setIsLoading(false);
   }
 
   void dispose() {

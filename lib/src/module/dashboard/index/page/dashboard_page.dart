@@ -132,7 +132,7 @@ class _DashboardPageState extends State<DashboardPage> {
                   child: TextFieldMessage(
                     controller: controller.message,
                     onSubmitted: (value) {
-                      notificationController.sendNotification(value);
+                      notificationController.sendNotification(value, context);
                     },
                   ),
                 ),

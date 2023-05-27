@@ -1,8 +1,6 @@
 import 'dart:async';
-import 'package:flutter/material.dart';
 import 'package:location/location.dart';
 import 'package:share_app/config/shared_preferences/shared_pref.dart';
-import 'package:share_app/src/shared/client/location/location_client.dart';
 import 'package:workmanager/workmanager.dart';
 
 class LocationController {
@@ -71,15 +69,15 @@ class LocationController {
     var fcmToken = await sharedPref.getFcmToken();
     var userId = await sharedPref.getUserId();
 
-    try {
-      await LocationClient.repository.sendLocation(
-        latitude,
-        longitude,
-        fcmToken,
-        userId,
-      );
-    } catch (e) {
-      debugPrint(e.toString());
-    }
+    // try {
+    //   await LocationService.repository.sendLocation(
+    //     latitude,
+    //     longitude,
+    //     fcmToken,
+    //     userId,
+    //   );
+    // } catch (e) {
+    //   debugPrint(e.toString());
+    // }
   }
 }
