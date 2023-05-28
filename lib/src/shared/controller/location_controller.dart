@@ -1,83 +1,39 @@
-import 'dart:async';
-import 'package:location/location.dart';
+import 'package:flutter/material.dart';
 import 'package:share_app/config/shared_preferences/shared_pref.dart';
-import 'package:workmanager/workmanager.dart';
+import 'package:http/http.dart' as http;
 
-class LocationController {
-  final Location location = Location();
-  final Workmanager workmanager = Workmanager();
-  final SharedPref sharedPref = SharedPref();
-
-  Future<void> getCurrentLocation() async {
-    bool serviceEnabled;
-    PermissionStatus permissionGranted;
-
-    serviceEnabled = await location.serviceEnabled();
-
-    if (!serviceEnabled) {
-      serviceEnabled = await location.requestService();
-
-      if (!serviceEnabled) {
-        return;
-      }
+abstract class GeolocationService {
+  static void sendLocationData(location) async {
+    if (location == null) {
+      return;
     }
 
-    permissionGranted = await location.hasPermission();
+    try {
+      var fcmToken = await SharedPref().getFcmToken();
+      var userId = await SharedPref().getUserId();
+      var userName = await SharedPref().getUserName();
 
-    if (permissionGranted == PermissionStatus.denied) {
-      permissionGranted = await location.requestPermission();
+      debugPrint('User ID: $userId');
+      debugPrint('fcmToken: $fcmToken');
+      debugPrint('Lat: ${location.latitude}');
+      debugPrint('Lng: ${location.longitude}');
 
-      if (permissionGranted != PermissionStatus.granted) {
-        return;
+      final url = Uri.parse(
+          'https://us-central1-share-app-mobile.cloudfunctions.net/saveUserLocation');
+
+      final response = await http.post(url, body: {
+        'uid': userId,
+        'lat': location.latitude.toString(),
+        'lng': location.longitude.toString(),
+        'fcmToken': fcmToken,
+        'name': userName,
+      });
+
+      if (response.statusCode != 200) {
+        throw Exception('Failed to send location');
       }
+    } catch (e) {
+      debugPrint(e.toString());
     }
-
-    LocationData locationData = await location.getLocation();
-
-    double latitude = locationData.latitude!;
-    double longitude = locationData.longitude!;
-
-    sendLocation(latitude, longitude);
-  }
-
-  static void callbackDispatcher() {
-    Workmanager().executeTask((task, inputData) async {
-      await LocationController().getCurrentLocation();
-
-      return Future.value(true);
-    });
-  }
-
-  static void registerBackgroundTask() async {
-    Workmanager().initialize(
-      callbackDispatcher,
-      isInDebugMode: false,
-    );
-
-    Workmanager().registerOneOffTask(
-      "1",
-      'getCurrentLocation',
-      initialDelay: const Duration(minutes: 2),
-      constraints: Constraints(
-        networkType: NetworkType.connected,
-        requiresCharging: true,
-      ),
-    );
-  }
-
-  void sendLocation(latitude, longitude) async {
-    var fcmToken = await sharedPref.getFcmToken();
-    var userId = await sharedPref.getUserId();
-
-    // try {
-    //   await LocationService.repository.sendLocation(
-    //     latitude,
-    //     longitude,
-    //     fcmToken,
-    //     userId,
-    //   );
-    // } catch (e) {
-    //   debugPrint(e.toString());
-    // }
   }
 }

@@ -3,53 +3,40 @@ import 'dart:async';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:share_app/config/firebase/firebase_options.dart';
 import 'package:share_app/config/routes/app_routes.dart';
 import 'package:share_app/config/routes/initial_route.dart';
 import 'package:share_app/config/shared_preferences/shared_pref.dart';
-import 'package:share_app/src/shared/controller/location_controller.dart';
 import 'package:share_app/src/shared/service/notification/notification_service.dart';
-
-final FirebaseMessaging firebaseMessaging = FirebaseMessaging.instance;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await Future.wait([
-    Future.delayed(const Duration(seconds: 2), () {}),
-    Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    ),
-  ]);
+  await Future<void>.delayed(const Duration(seconds: 2));
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  final SharedPref sharedPref = SharedPref();
+  FirebaseMessaging firebaseMessaging = FirebaseMessaging.instance;
 
-  FirebaseMessaging messaging = FirebaseMessaging.instance;
+  try {
+    final fcmToken = await firebaseMessaging.getToken();
 
-  NotificationSettings settings = await messaging.requestPermission(
-    alert: true,
-    badge: true,
-    sound: true,
-  );
+    debugPrint("FCM Token: $fcmToken");
 
-  if (settings.authorizationStatus == AuthorizationStatus.denied) {
-    await messaging.unsubscribeFromTopic('all');
+    await firebaseMessaging.setAutoInitEnabled(true);
+    await firebaseMessaging.requestPermission(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
+    await SharedPref().setFcmToken(fcmToken!);
+
+    String initialRoute = await InitialRoute().initialize();
+
+    runApp(ShareApp(initialRoute: initialRoute));
+  } catch (e) {
+    debugPrint("Error initializing Firebase Messaging: $e");
   }
-
-  final fcmToken = await messaging.getToken();
-  await messaging.subscribeToTopic('all');
-
-  if (fcmToken != null && fcmToken != '') {
-    await sharedPref.setFcmToken(fcmToken);
-  }
-
-  await messaging.setAutoInitEnabled(true);
-
-  LocationController.registerBackgroundTask();
-
-  String initialRoute = await InitialRoute().initialize();
-
-  runApp(ShareApp(initialRoute: initialRoute));
 }
 
 class ShareApp extends StatefulWidget {
@@ -65,24 +52,45 @@ class ShareApp extends StatefulWidget {
 }
 
 class _ShareAppState extends State<ShareApp> {
+  static const platform = MethodChannel('com.example.share_app/location');
+
+  late FirebaseMessaging firebaseMessaging;
+
   @override
   void initState() {
     super.initState();
-    initilizeFirebaseMessaging();
+    initializeFirebaseMessaging();
+    startLocationService();
   }
 
-  initilizeFirebaseMessaging() async {
+  void initializeFirebaseMessaging() {
+    debugPrint("Initializing Firebase Messaging...");
     NotificationService.initialize();
 
+    debugPrint("Initializing Firebase Messaging...2");
+
+    firebaseMessaging = FirebaseMessaging.instance;
+
+    debugPrint("Initializing Firebase Messaging...3");
+
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      debugPrint("FCM Message: ${message.notification?.body}");
       NotificationService.showNotification(message);
     });
 
-    FirebaseMessaging.onBackgroundMessage(
-      (RemoteMessage message) async {
-        NotificationService.showNotification(message);
-      },
-    );
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      debugPrint("FCM Message: ${message.notification?.body}");
+      NotificationService.showNotification(message);
+    });
+  }
+
+  Future<void> startLocationService() async {
+    try {
+      debugPrint("Starting location service...");
+      await platform.invokeMethod('startLocationService');
+    } on PlatformException catch (e) {
+      debugPrint("Error starting location service: ${e.message}");
+    }
   }
 
   @override
