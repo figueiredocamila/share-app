@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:share_app/config/exceptions/notification_exceptions.dart';
@@ -6,31 +8,72 @@ import 'package:share_app/src/shared/model/notification_model.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 
-class NotificationController {
+abstract class NotificationController {
   final FirebaseMessaging messaging = FirebaseMessaging.instance;
-  final NotificationException notificationException = NotificationException();
-  SharedPref sharedPref = SharedPref();
   static const String notification = '';
   static List<NotificationModel> sentNotification = [];
   static List<NotificationModel> recievedNotification = [];
 
-  List<NotificationModel> getSentNotification() {
-    return sentNotification;
+  static Future<List<NotificationModel>> getSentNotification() async {
+    try {
+      var userId = await SharedPref().getUserId();
+
+      final url = Uri.parse(
+          'https://us-central1-share-app-mobile.cloudfunctions.net/getSentNotifications');
+
+      print(userId);
+
+      final response = await http.post(url, body: {
+        'userId': userId,
+      });
+
+      if (response.statusCode != 200) {
+        throw NotificationException().notificationNotFount();
+      }
+
+      return jsonDecode(response.body)
+          .map<NotificationModel>((json) => NotificationModel.fromJson(json))
+          .toList();
+    } catch (e) {
+      debugPrint(e.toString());
+      return [];
+    }
   }
 
-  List<NotificationModel> getRecievedNotification() {
-    return recievedNotification;
+  static Future<List<NotificationModel>> getRecievedNotification() async {
+    try {
+      var userId = await SharedPref().getUserId();
+
+      final url = Uri.parse(
+          'https://us-central1-share-app-mobile.cloudfunctions.net/getNotifications');
+
+      final response = await http.post(url, body: {
+        'userId': userId,
+      });
+
+      if (response.statusCode != 200) {
+        throw NotificationException().notificationNotFount();
+      }
+
+      return jsonDecode(response.body)
+          .map<NotificationModel>((json) => NotificationModel.fromJson(json))
+          .toList();
+    } catch (e) {
+      debugPrint(e.toString());
+      return [];
+    }
   }
 
-  Future<void> sendNotification(String body, BuildContext context) async {
+  static Future<void> sendNotification(
+      String body, BuildContext context) async {
     if (body.isNotEmpty) {
       try {
         Position position = await Geolocator.getCurrentPosition(
           desiredAccuracy: LocationAccuracy.high,
         );
 
-        var userId = await sharedPref.getUserId();
-        var userName = await sharedPref.getUserName();
+        var userId = await SharedPref().getUserId();
+        var userName = await SharedPref().getUserName();
         var lat = position.latitude;
         var lng = position.longitude;
 
@@ -46,18 +89,8 @@ class NotificationController {
         });
 
         if (response.statusCode != 200) {
-          throw notificationException;
+          throw NotificationException();
         }
-
-        sentNotification.add(
-          NotificationModel(
-            body: body,
-            title: userName,
-            lat: lat,
-            lng: lng,
-            userId: userId,
-          ),
-        );
       } catch (e) {
         debugPrint(e.toString());
       }

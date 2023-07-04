@@ -29,6 +29,7 @@ Future<void> main() async {
       badge: true,
       sound: true,
     );
+
     await SharedPref().setFcmToken(fcmToken!);
 
     String initialRoute = await InitialRoute().initialize();
@@ -64,14 +65,9 @@ class _ShareAppState extends State<ShareApp> {
   }
 
   void initializeFirebaseMessaging() {
-    debugPrint("Initializing Firebase Messaging...");
     NotificationService.initialize();
 
-    debugPrint("Initializing Firebase Messaging...2");
-
     firebaseMessaging = FirebaseMessaging.instance;
-
-    debugPrint("Initializing Firebase Messaging...3");
 
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       debugPrint("FCM Message: ${message.notification?.body}");
@@ -86,7 +82,6 @@ class _ShareAppState extends State<ShareApp> {
 
   Future<void> startLocationService() async {
     try {
-      debugPrint("Starting location service...");
       await platform.invokeMethod('startLocationService');
     } on PlatformException catch (e) {
       debugPrint("Error starting location service: ${e.message}");

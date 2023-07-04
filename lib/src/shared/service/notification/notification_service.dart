@@ -37,6 +37,10 @@ class NotificationService {
           ),
         ),
       );
+
+      // NotificationController.getRecievedNotification().then((notifications) {
+      //   NotificationController.recievedNotification = notifications;
+      // });
     }
   }
 }

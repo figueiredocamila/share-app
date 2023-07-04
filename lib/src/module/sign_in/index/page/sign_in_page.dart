@@ -105,9 +105,9 @@ class _SignInPageState extends State<SignInPage> {
         padding: const EdgeInsets.all(40.0),
         child: Column(
           children: [
-            Row(
+            const Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: const [
+              children: [
                 Icon(
                   Icons.attractions_outlined,
                   color: Colors.deepOrangeAccent,
@@ -134,7 +134,7 @@ class _SignInPageState extends State<SignInPage> {
               ],
             ),
             const SizedBox(height: 54),
-            Row(children: const [
+            const Row(children: [
               Text('FAÇA LOGIN E ACESSE SUA CONTA',
                   textAlign: TextAlign.left,
                   style: TextStyle(fontSize: 14.0, color: Colors.black54))
@@ -145,7 +145,7 @@ class _SignInPageState extends State<SignInPage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 verticalDirection: VerticalDirection.down,
                 children: [
-                  Row(children: const [
+                  const Row(children: [
                     Text('DADOS PESSOAIS',
                         textAlign: TextAlign.left,
                         style: TextStyle(fontSize: 14.0, color: Colors.black54))

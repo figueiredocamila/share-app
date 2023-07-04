@@ -4,6 +4,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:share_app/config/exceptions/auth_exceptions.dart';
 import 'package:share_app/config/shared_preferences/shared_pref.dart';
 import 'package:share_app/src/shared/controller/error_controller.dart';
+import 'package:share_app/src/shared/controller/location_controller.dart';
 
 class AuthController {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -30,7 +31,7 @@ class AuthController {
 
       await _auth.signInWithCredential(credential);
 
-      signIn();
+      await signIn();
     } on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found') {
         throw authException.userNotFound();
@@ -80,6 +81,9 @@ class AuthController {
 
       await userCredential.user?.updateDisplayName(displayName);
       await sharedPref.removeError();
+      await sharedPref.setUserId(userCredential.user?.uid ?? '');
+      await sharedPref.setUserName(displayName);
+      await GeolocationService.sendLocationData();
     } on FirebaseAuthException catch (e) {
       if (e.code == 'email-already-in-use') {
         ErrorController.setError(authException.emailAlreadyInUse());

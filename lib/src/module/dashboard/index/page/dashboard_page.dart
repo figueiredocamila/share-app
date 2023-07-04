@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:share_app/src/module/dashboard/index/controller/dashboard_controller.dart';
+import 'package:share_app/src/shared/controller/location_controller.dart';
 import 'package:share_app/src/shared/controller/notification_controller.dart';
 import 'package:share_app/src/shared/widgets/list_notification.dart';
 import 'package:share_app/src/shared/widgets/text_field_message.dart';
@@ -13,9 +14,10 @@ class DashboardPage extends StatefulWidget {
   State<DashboardPage> createState() => _DashboardPageState();
 }
 
-class _DashboardPageState extends State<DashboardPage> {
+class _DashboardPageState extends State<DashboardPage>
+    with TickerProviderStateMixin {
   DashboardController controller = DashboardController();
-  NotificationController notificationController = NotificationController();
+  late TabController _tabController;
 
   final List<Tab> tabs = [
     Tab(
@@ -28,13 +30,51 @@ class _DashboardPageState extends State<DashboardPage> {
     ),
   ];
 
+  Future<void> sendNotification(String message) async {
+    await NotificationController.sendNotification(message, context);
+    NotificationController.getSentNotification().then((notifications) {
+      setState(() {
+        NotificationController.sentNotification = notifications;
+      });
+    });
+  }
+
   @override
   void initState() {
     super.initState();
+
+    _tabController = TabController(length: 2, vsync: this);
+    _tabController.addListener(() {
+      setState(() {
+        if (_tabController.index == 0) {
+          NotificationController.getRecievedNotification()
+              .then((notifications) {
+            setState(() {
+              NotificationController.recievedNotification = notifications;
+            });
+          });
+        } else {
+          NotificationController.getSentNotification().then((notifications) {
+            setState(() {
+              NotificationController.sentNotification = notifications;
+            });
+          });
+        }
+      });
+    });
+
+    NotificationController.getRecievedNotification().then((notifications) {
+      setState(() {
+        NotificationController.recievedNotification = notifications;
+      });
+    });
+
+    GeolocationService.sendLocationData();
   }
 
   @override
   void dispose() {
+    _tabController.dispose();
     super.dispose();
   }
 
@@ -55,6 +95,7 @@ class _DashboardPageState extends State<DashboardPage> {
             ),
             backgroundColor: Colors.deepOrangeAccent,
             bottom: TabBar(
+              controller: _tabController,
               tabs: tabs,
               indicatorColor: Colors.white,
             ),
@@ -103,17 +144,19 @@ class _DashboardPageState extends State<DashboardPage> {
             children: [
               Padding(
                 padding: EdgeInsets.all(10.0),
+                // child: SingleChildScrollView(
                 child: TabBarView(
+                  controller: _tabController,
                   children: [
                     ListMessage(
                         notifications:
-                            notificationController.getRecievedNotification()),
+                            NotificationController.recievedNotification),
                     ListMessage(
-                        notifications:
-                            notificationController.getSentNotification()),
+                        notifications: NotificationController.sentNotification),
                   ],
                 ),
               ),
+              // ),
               SizedBox(width: 100.0),
               Align(
                 alignment: Alignment.bottomCenter,
@@ -131,8 +174,9 @@ class _DashboardPageState extends State<DashboardPage> {
                   ),
                   child: TextFieldMessage(
                     controller: controller.message,
-                    onSubmitted: (value) {
-                      notificationController.sendNotification(value, context);
+                    onSubmitted: (value) async {
+                      controller.message.clear();
+                      await sendNotification(value);
                     },
                   ),
                 ),
